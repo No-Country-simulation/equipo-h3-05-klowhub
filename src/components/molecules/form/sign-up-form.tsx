@@ -14,12 +14,16 @@ import {
 } from '@/components/'
 import { Route } from '@/const'
 import { signUpSchema, SignUpSchema } from '@/schemas/auth.schema'
+import { signUp } from '@/service'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 function SignUpForm() {
+  const router = useRouter()
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -30,8 +34,23 @@ function SignUpForm() {
     }
   })
 
-  function onSubmit(values: SignUpSchema) {
-    console.log(values)
+  async function onSubmit(values: SignUpSchema) {
+    try {
+      const { error } = await signUp({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        avatarUrl: '',
+        lastName: ''
+      })
+
+      if (error) return toast.error(error.message)
+
+      toast.success('¡Gracias por registrarte!')
+      router.push(Route.Login)
+    } catch (error) {
+      toast.error('Error al registrarte')
+    }
   }
 
   return (

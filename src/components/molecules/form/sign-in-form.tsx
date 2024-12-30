@@ -1,5 +1,4 @@
 'use client'
-
 import {
   AuthProviders,
   Button,
@@ -16,8 +15,10 @@ import { Route } from '@/const'
 import { signInSchema, SignInSchema } from '@/schemas/auth.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2Icon } from 'lucide-react'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 function SignInForm() {
   /**
@@ -37,8 +38,20 @@ function SignInForm() {
    * Submits the sign-in form, logging the `SignInSchema` values to the console.
    * @param values - The `SignInSchema` values to log.
    */
-  function onSubmit(values: SignInSchema) {
-    console.log(values)
+  async function onSubmit(values: SignInSchema) {
+    try {
+      const response = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
+        redirect: Route.Login
+      })
+
+      if (response?.error) return toast.error(response.error)
+
+      toast.success('¡Bienvenido de nuevo!')
+    } catch (error) {
+      toast.error('Error al iniciar sesion')
+    }
   }
 
   return (
@@ -95,3 +108,4 @@ function SignInForm() {
 }
 
 export { SignInForm }
+
